@@ -71,8 +71,11 @@ app.get('/api/news', async (req, res) => {
     }));
     res.json(articles);
   } catch (err) {
-    console.error("News fetch error:", err.response?.data || err.message);
-    res.status(500).json({ error: 'News API failed' });
+    console.error("News fetch error:", err.response?.data || err.message);  // This will log exact cause
+    res.status(500).json({
+      error: 'News API failed',
+      detail: err.response?.data || err.message  // This sends real error back to browser
+    });
   }
 });
 
