@@ -7,7 +7,7 @@ app.use(cors());
 
 const PORT = process.env.PORT || 5000;
 const TWELVE_API_KEY = process.env.TWELVE_KEY;
-const GNEWS_API_KEY = '28c39174f6d1b5a63a3f819e37f7303f'; // Replace with your own GNews API key if needed
+const GNEWS_API_KEY = 'b4a0c3289954e7fdd84253d28aabf7ed'; // Replace with your own GNews API key if needed
 
 const stockSymbols = ['AAPL', 'TSLA', 'GOOGL', 'MSFT', 'AMZN'];
 
