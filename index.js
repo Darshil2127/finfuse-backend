@@ -1,13 +1,14 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
 
 const PORT = process.env.PORT || 5000;
 const TWELVE_API_KEY = process.env.TWELVE_KEY;
-const GNEWS_API_KEY = 'b4a0c3289954e7fdd84253d28aabf7ed'; // Replace with your own GNews API key if needed
+const GNEWS_API_KEY = process.env.GNEWS_KEY;
 
 const stockSymbols = ['AAPL', 'TSLA', 'GOOGL', 'MSFT', 'AMZN'];
 
@@ -61,15 +62,19 @@ app.get('/api/crypto', async (req, res) => {
   }
 });
 
-// === GNEWS ===
+// === GNEWS NEWS ===
 app.get('/api/news', async (req, res) => {
   try {
     const response = await axios.get(
       `https://gnews.io/api/v4/top-headlines?category=business&lang=en&max=5&apikey=${GNEWS_API_KEY}`
     );
+
     const articles = response.data.articles.map(article => ({
       title: article.title,
+      description: article.description,
+      url: article.url
     }));
+
     res.json(articles);
   } catch (err) {
     console.error("GNews fetch error:", err.response?.data || err.message);
