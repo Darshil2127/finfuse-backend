@@ -37,21 +37,30 @@ app.get('/api/stocks', async (req, res) => {
   }
 });
 
-// === CRYPTO (CoinCap) ===
+// === CRYPTO (CoinCap + Logo URLs) ===
 app.get('/api/crypto', async (req, res) => {
   try {
-    const response = await axios.get('https://api.coincap.io/v2/assets?limit=10');
+    const response = await axios.get('https://api.coincap.io/v2/assets');
     const coins = response.data?.data;
 
     if (!Array.isArray(coins)) {
       throw new Error("CoinCap returned invalid data");
     }
 
-    const filtered = coins.filter(c => ['BTC', 'ETH', 'DOGE', 'SOL'].includes(c.symbol));
+    const symbolsWithLogos = {
+      BTC: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
+      ETH: 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
+      DOGE: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png',
+      SOL: 'https://cryptologos.cc/logos/solana-sol-logo.png',
+    };
+
+    const filtered = coins.filter(c => Object.keys(symbolsWithLogos).includes(c.symbol.toUpperCase()));
+
     const formatted = filtered.map(c => ({
       symbol: c.symbol,
       price: parseFloat(c.priceUsd).toFixed(2),
       change: parseFloat(c.changePercent24Hr).toFixed(2),
+      logo: symbolsWithLogos[c.symbol.toUpperCase()]
     }));
 
     res.json(formatted);
@@ -61,8 +70,7 @@ app.get('/api/crypto', async (req, res) => {
   }
 });
 
-
-// === GNEWS NEWS ===
+// === GNEWS ===
 app.get('/api/news', async (req, res) => {
   try {
     const response = await axios.get(
