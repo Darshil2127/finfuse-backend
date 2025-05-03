@@ -46,7 +46,7 @@ app.get('/api/crypto', async (req, res) => {
     const data = response.data;
 
     if (!data || typeof data !== 'object') {
-      return res.status(500).json({ error: 'Invalid crypto response' });
+      throw new Error('Invalid crypto response');
     }
 
     const formatted = Object.keys(data).map((key) => ({
@@ -57,12 +57,19 @@ app.get('/api/crypto', async (req, res) => {
 
     res.json(formatted);
   } catch (error) {
-    console.error("Crypto fetch error:", error.message);
-    res.status(500).json({ error: 'Crypto API failed' });
+    console.warn('CoinGecko error:', error.message);
+
+    // fallback dummy crypto data
+    res.json([
+      { symbol: 'BTC', price: '62700', change: '0.23' },
+      { symbol: 'ETH', price: '3200', change: '-0.12' },
+      { symbol: 'DOGE', price: '0.15', change: '1.5' },
+      { symbol: 'SOL', price: '140', change: '0.8' }
+    ]);
   }
 });
 
-// === GNEWS NEWS ===
+// === GNEWS ===
 app.get('/api/news', async (req, res) => {
   try {
     const response = await axios.get(
