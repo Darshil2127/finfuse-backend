@@ -1,30 +1,36 @@
-
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
 
 const PORT = process.env.PORT || 5000;
+const TWELVE_API_KEY = process.env.TWELVE_KEY;
 
 const symbols = ['AAPL', 'TSLA', 'GOOGL', 'MSFT', 'AMZN'];
 
 app.get('/api/stocks', async (req, res) => {
   try {
     const response = await axios.get(
-      `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols.join(',')}`
+      `https://api.twelvedata.com/quote?symbol=${symbols.join(',')}&apikey=${TWELVE_API_KEY}`
     );
-    const quotes = response.data.quoteResponse.result;
-    const formatted = quotes.map(q => ({
-      symbol: q.symbol,
-      price: q.regularMarketPrice.toFixed(2),
-      change: q.regularMarketChangePercent.toFixed(2),
+
+    const results = Array.isArray(response.data)
+      ? response.data
+      : [response.data]; // handle single vs batch
+
+    const formatted = results.map(stock => ({
+      symbol: stock.symbol,
+      price: parseFloat(stock.price).toFixed(2),
+      change: parseFloat(stock.percent_change).toFixed(2),
     }));
+
     res.json(formatted);
   } catch (err) {
-    console.error("Yahoo fetch error:", err.response?.data || err.message);
-    res.status(500).json({ error: 'Yahoo fetch failed' });
+    console.error("Twelve Data error:", err.response?.data || err.message);
+    res.status(500).json({ error: 'Stock API failed' });
   }
 });
 
