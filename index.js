@@ -37,39 +37,26 @@ app.get('/api/stocks', async (req, res) => {
   }
 });
 
-// === CRYPTO ===
+// === CRYPTO (CoinCap) ===
 app.get('/api/crypto', async (req, res) => {
   try {
-    const response = await axios.get(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,dogecoin,solana&vs_currencies=usd&include_24hr_change=true'
-    );
-    const data = response.data;
+    const response = await axios.get('https://api.coincap.io/v2/assets?limit=4');
+    const coins = response.data.data;
 
-    if (!data || typeof data !== 'object') {
-      throw new Error('Invalid crypto response');
-    }
-
-    const formatted = Object.keys(data).map((key) => ({
-      symbol: key.toUpperCase(),
-      price: data[key].usd.toFixed(2),
-      change: data[key].usd_24h_change.toFixed(2),
+    const formatted = coins.map(c => ({
+      symbol: c.symbol,
+      price: parseFloat(c.priceUsd).toFixed(2),
+      change: parseFloat(c.changePercent24Hr).toFixed(2),
     }));
 
     res.json(formatted);
   } catch (error) {
-    console.warn('CoinGecko error:', error.message);
-
-    // fallback dummy crypto data
-    res.json([
-      { symbol: 'BTC', price: '62700', change: '0.23' },
-      { symbol: 'ETH', price: '3200', change: '-0.12' },
-      { symbol: 'DOGE', price: '0.15', change: '1.5' },
-      { symbol: 'SOL', price: '140', change: '0.8' }
-    ]);
+    console.error("CoinCap fetch error:", error.message);
+    res.status(500).json({ error: 'Crypto API failed' });
   }
 });
 
-// === GNEWS ===
+// === GNEWS NEWS ===
 app.get('/api/news', async (req, res) => {
   try {
     const response = await axios.get(
@@ -92,4 +79,4 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
