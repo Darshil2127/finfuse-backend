@@ -7,6 +7,7 @@ app.use(cors());
 
 const PORT = process.env.PORT || 5000;
 const TWELVE_API_KEY = process.env.TWELVE_KEY;
+const GNEWS_API_KEY = '28c39174f6d1b5a63a3f819e37f7303f'; // Replace with your own GNews API key if needed
 
 const stockSymbols = ['AAPL', 'TSLA', 'GOOGL', 'MSFT', 'AMZN'];
 
@@ -60,21 +61,21 @@ app.get('/api/crypto', async (req, res) => {
   }
 });
 
-// === NEWS ===
+// === GNEWS ===
 app.get('/api/news', async (req, res) => {
   try {
     const response = await axios.get(
-      'https://newsapi.org/v2/top-headlines?category=business&language=en&pageSize=5&apiKey=a83ad9eb42d84e458dc98fa4a983c0ba'
+      `https://gnews.io/api/v4/top-headlines?category=business&lang=en&max=5&apikey=${GNEWS_API_KEY}`
     );
     const articles = response.data.articles.map(article => ({
       title: article.title,
     }));
     res.json(articles);
   } catch (err) {
-    console.error("News fetch error:", err.response?.data || err.message);  // This will log exact cause
+    console.error("GNews fetch error:", err.response?.data || err.message);
     res.status(500).json({
-      error: 'News API failed',
-      detail: err.response?.data || err.message  // This sends real error back to browser
+      error: 'GNews API failed',
+      detail: err.response?.data || err.message
     });
   }
 });
