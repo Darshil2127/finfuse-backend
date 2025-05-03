@@ -40,10 +40,15 @@ app.get('/api/stocks', async (req, res) => {
 // === CRYPTO (CoinCap) ===
 app.get('/api/crypto', async (req, res) => {
   try {
-    const response = await axios.get('https://api.coincap.io/v2/assets?limit=4');
-    const coins = response.data.data;
+    const response = await axios.get('https://api.coincap.io/v2/assets?limit=10');
+    const coins = response.data?.data;
 
-    const formatted = coins.map(c => ({
+    if (!Array.isArray(coins)) {
+      throw new Error("CoinCap returned invalid data");
+    }
+
+    const filtered = coins.filter(c => ['BTC', 'ETH', 'DOGE', 'SOL'].includes(c.symbol));
+    const formatted = filtered.map(c => ({
       symbol: c.symbol,
       price: parseFloat(c.priceUsd).toFixed(2),
       change: parseFloat(c.changePercent24Hr).toFixed(2),
@@ -51,10 +56,11 @@ app.get('/api/crypto', async (req, res) => {
 
     res.json(formatted);
   } catch (error) {
-    console.error("CoinCap fetch error:", error.message);
-    res.status(500).json({ error: 'Crypto API failed' });
+    console.error("CoinCap error:", error.message);
+    res.status(500).json({ error: 'Crypto API failed', detail: error.message });
   }
 });
+
 
 // === GNEWS NEWS ===
 app.get('/api/news', async (req, res) => {
