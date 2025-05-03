@@ -1,7 +1,6 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -11,6 +10,7 @@ const TWELVE_API_KEY = process.env.TWELVE_KEY;
 
 const stockSymbols = ['AAPL', 'TSLA', 'GOOGL', 'MSFT', 'AMZN'];
 
+// === STOCKS ===
 app.get('/api/stocks', async (req, res) => {
   try {
     const responses = await Promise.all(
@@ -35,27 +35,36 @@ app.get('/api/stocks', async (req, res) => {
   }
 });
 
+// === CRYPTO ===
 app.get('/api/crypto', async (req, res) => {
   try {
     const response = await axios.get(
       'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,dogecoin,solana&vs_currencies=usd&include_24hr_change=true'
     );
     const data = response.data;
+
+    if (!data || typeof data !== 'object') {
+      return res.status(500).json({ error: 'Invalid crypto response' });
+    }
+
     const formatted = Object.keys(data).map((key) => ({
       symbol: key.toUpperCase(),
       price: data[key].usd.toFixed(2),
       change: data[key].usd_24h_change.toFixed(2),
     }));
+
     res.json(formatted);
   } catch (error) {
+    console.error("Crypto fetch error:", error.message);
     res.status(500).json({ error: 'Crypto API failed' });
   }
 });
 
+// === NEWS ===
 app.get('/api/news', async (req, res) => {
   try {
     const response = await axios.get(
-      `https://newsapi.org/v2/top-headlines?category=business&language=en&pageSize=5&apiKey=${process.env.NEWS_KEY}`
+      'https://newsapi.org/v2/top-headlines?category=business&language=en&pageSize=5&apiKey=a83ad9eb42d84e458dc98fa4a983c0ba'
     );
     const articles = response.data.articles.map(article => ({
       title: article.title,
