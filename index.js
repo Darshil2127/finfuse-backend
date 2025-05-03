@@ -21,10 +21,10 @@ app.get('/api/stocks', async (req, res) => {
     );
 
     const formatted = responses
-      .filter(stock => stock && stock.price && !isNaN(parseFloat(stock.price)))
+      .filter(stock => stock && stock.close && !isNaN(parseFloat(stock.close)))
       .map(stock => ({
         symbol: stock.symbol,
-        price: parseFloat(stock.price).toFixed(2),
+        price: parseFloat(stock.close).toFixed(2),
         change: parseFloat(stock.percent_change).toFixed(2),
       }));
 
